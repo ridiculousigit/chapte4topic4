@@ -1,59 +1,77 @@
 package binar.academy.chapte4topic4
 
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import binar.academy.chapte4topic4.databinding.FragmentLoginBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [LoginFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class LoginFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentLoginBinding
+    private lateinit var sharedPrefRegis: SharedPreferences
+    private lateinit var sharedPrefLogin: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+    private val sharedNameRegis = "userRegister"
+    private val sharedNameLogin = "userLogin"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_login, container, false)
+        binding = FragmentLoginBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment LoginFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            LoginFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        // It will fetch by default the related activity
+        sharedPrefRegis = requireActivity().getSharedPreferences(sharedNameRegis, 0)
+        sharedPrefLogin = requireActivity().getSharedPreferences(sharedNameLogin, 0)
+        editor = sharedPrefLogin.edit()
+
+        // Button sign in
+        binding.btnLogin.setOnClickListener {
+            signIn()
+        }
+
+        // Option sign up
+        binding.tvRegister.setOnClickListener {
+            optionRegister()
+        }
+    }
+
+    // Method for user sign in
+    private fun signIn() {
+        val userLog = binding.etUserlog.text.toString()
+        val passLog = binding.etPasslog.text.toString()
+        val userReg = sharedPrefRegis.getString("username", "")
+        val passReg = sharedPrefRegis.getString("password", "")
+
+        when {
+            userReg == "" && passReg == "" -> {
+                Toast.makeText(requireContext(), "You're not registered !", Toast.LENGTH_SHORT).show()
             }
+            userLog == userReg && passLog == passReg -> {
+                editor.putString("username", userLog)
+                editor.putString("password", passLog)
+                editor.apply()
+                findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+            }
+            else -> {
+                Toast.makeText(requireContext(), "The username or password is incorrect !", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // It will redirect to Register Fragment
+    private fun optionRegister() {
+        findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
     }
 }

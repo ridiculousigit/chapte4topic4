@@ -1,59 +1,71 @@
 package binar.academy.chapte4topic4
 
+import android.content.Context
+import android.content.SharedPreferences
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.navigation.fragment.findNavController
+import binar.academy.chapte4topic4.databinding.FragmentRegisterBinding
 
-// TODO: Rename parameter arguments, choose names that match
-// the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-private const val ARG_PARAM1 = "param1"
-private const val ARG_PARAM2 = "param2"
-
-/**
- * A simple [Fragment] subclass.
- * Use the [RegisterFragment.newInstance] factory method to
- * create an instance of this fragment.
- */
 class RegisterFragment : Fragment() {
-    // TODO: Rename and change types of parameters
-    private var param1: String? = null
-    private var param2: String? = null
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        arguments?.let {
-            param1 = it.getString(ARG_PARAM1)
-            param2 = it.getString(ARG_PARAM2)
-        }
-    }
+    private lateinit var binding: FragmentRegisterBinding
+    private lateinit var sharedPref: SharedPreferences
+    private lateinit var editor: SharedPreferences.Editor
+    private val sharedDataRegister = "userRegister"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?,
+        savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_register, container, false)
+        binding = FragmentRegisterBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    companion object {
-        /**
-         * Use this factory method to create a new instance of
-         * this fragment using the provided parameters.
-         *
-         * @param param1 Parameter 1.
-         * @param param2 Parameter 2.
-         * @return A new instance of fragment RegisterFragment.
-         */
-        // TODO: Rename and change types and number of parameters
-        @JvmStatic
-        fun newInstance(param1: String, param2: String) =
-            RegisterFragment().apply {
-                arguments = Bundle().apply {
-                    putString(ARG_PARAM1, param1)
-                    putString(ARG_PARAM2, param2)
-                }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        sharedPref = requireActivity().getSharedPreferences(sharedDataRegister, Context.MODE_PRIVATE)
+        editor = sharedPref.edit()
+
+        // Button sign up
+        binding.btnRegister.setOnClickListener {
+            signUp()
+        }
+
+        // Option sign in
+        binding.tvSignin.setOnClickListener {
+            optionLogin()
+        }
+    }
+
+    // Method for user sign up
+    fun signUp() {
+        val fullname = binding.etUserfullname.text.toString()
+        val username = binding.etUserreg.text.toString()
+        val pass = binding.etPassreg.text.toString()
+        val confirm = binding.etConfirmreg.text.toString()
+
+        when {
+            pass.equals(confirm) -> {
+                editor.putString("fullname", fullname)
+                editor.putString("username", username)
+                editor.putString("password", pass)
+                editor.apply()
+                findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
             }
+            else -> {
+                Toast.makeText(requireContext(), "The password confirmation doesn't match with password !", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // It will redirect to Login Fragment
+    private fun optionLogin() {
+        findNavController().navigate(R.id.action_registerFragment_to_loginFragment)
     }
 }
